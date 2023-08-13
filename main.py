@@ -33,6 +33,9 @@ def main():
     #Edit task:
     edit_task_button = ttk.Button(buttons_frame, text="Editar tarea", command=edit_task)
     edit_task_button.pack(side=tk.LEFT, padx=20)
+    #Delete task:
+    delete_task_button = ttk.Button(buttons_frame, text="Eliminar tarea", command=delete_task)
+    delete_task_button.pack(side=tk.LEFT, padx=20)
     
     #Main loop:
     root.mainloop()
@@ -56,6 +59,13 @@ def edit_task():
             task_list.insert(selected_task_index, new_task)
         else:
             messagebox.showinfo("Error", "La tarea no puede quedar vacía!")
+    except IndexError:
+        messagebox.showinfo("Error", "No hay ninguna tarea seleccionada!")
+
+def delete_task():
+    try:
+        selected_task_index = task_list.curselection()[0]
+        task_list.delete(selected_task_index)
     except IndexError:
         messagebox.showinfo("Error", "No hay ninguna tarea seleccionada!")
 
