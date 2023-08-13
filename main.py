@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, simpledialog, messagebox
+from dialogs.task_dialog import TaskDialog
 
 task_list = None
+tasks = {}
 
 def main():
     global task_list
@@ -28,7 +30,7 @@ def main():
     buttons_frame.grid(row=1, column=0, pady=10, sticky="ew")
     
     #Add task:
-    add_task_button = ttk.Button(buttons_frame, text="Añadir tarea", command=add_task)
+    add_task_button = ttk.Button(buttons_frame, text="Añadir tarea", command=lambda:add_task(root))
     add_task_button.pack(side=tk.LEFT, padx=20)
     #Edit task:
     edit_task_button = ttk.Button(buttons_frame, text="Editar tarea", command=edit_task)
@@ -41,12 +43,19 @@ def main():
     root.mainloop()
 
 
-def add_task():
-    task = simpledialog.askstring("Nueva Tarea", "¿Qué tarea quieres agregar?")
-    if task:
-        task_list.insert(tk.END, task)
-    else:
-        messagebox.showinfo("Error", "La tarea no puede estar vacía!")
+def add_task(parent):
+    dialog = TaskDialog(parent, "Crear nueva tarea")
+    if dialog.result:
+        task_name, task_description, task_creation_date, task_due_date = dialog.result
+        if task_name:
+            task_list.insert(tk.END, task_name)
+            tasks[task_name] = {
+                "description": task_description,
+                "creation_date": task_creation_date,
+                "due_date": task_due_date
+            }
+        else:
+            messagebox.showinfo("Error", "El nombre de la tarea no puede estar vacío!")
 
 def edit_task():
     try:
