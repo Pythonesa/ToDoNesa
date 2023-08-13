@@ -22,6 +22,9 @@ def main():
     #Add task:
     add_task_button = ttk.Button(root, text="Añadir tarea", command=add_task)
     add_task_button.pack(pady=20)
+    #Edit task:
+    edit_task_button = ttk.Button(root, text="Editar tarea", command=edit_task)
+    edit_task_button.pack(pady=20)
     
     #Main loop:
     root.mainloop()
@@ -32,7 +35,21 @@ def add_task():
     if task:
         task_list.insert(tk.END, task)
     else:
-        messagebox.showinfo("Error", "La tarea no puede estar vacía")
+        messagebox.showinfo("Error", "La tarea no puede estar vacía!")
+
+def edit_task():
+    try:
+        selected_task_index = task_list.curselection()[0]
+        current_task = task_list.get(selected_task_index)
+        new_task = simpledialog.askstring("Editar Tarea", "Edita la tarea:")
+    
+        if new_task:
+            task_list.delete(selected_task_index)
+            task_list.insert(selected_task_index, new_task)
+        else:
+            messagebox.showinfo("Error", "La tarea no puede quedar vacía!")
+    except IndexError:
+        messagebox.showinfo("Error", "No hay ninguna tarea seleccionada!")
 
 
 if __name__ == "__main__":
