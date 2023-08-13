@@ -86,10 +86,19 @@ def edit_task(parent):
 
 def delete_task():
     try:
-        selected_task_index = task_list.curselection()[0]
-        task_list.delete(selected_task_index)
-    except IndexError:
-        messagebox.showinfo("Error", "No hay ninguna tarea seleccionada!")
+        selected_task_index = task_list.curselection()
+        if not selected_task_index:
+            messagebox.showinfo("Error", "No hay ninguna tarea seleccionada!")
+            return
+        
+        task_name = task_list.get(selected_task_index[0])
+        
+        confirm = messagebox.askyesno("Confirmar", f"¿Estás seguro de que vas a eliminar la tarea '{task_name}'?")
+        if confirm:
+            del tasks[task_name]
+            task_list.delete(selected_task_index[0])
+    except KeyError:
+        messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
 
 
 if __name__ == "__main__":
