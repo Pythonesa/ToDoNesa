@@ -57,6 +57,9 @@ def add_task(parent):
     if dialog.result:
         task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date = dialog.result
         if task_name:
+            if task_name in tasks:
+                messagebox.showinfo("Error", "Ya existe una tarea con ese nombre!")
+                return
             tree.insert("", "end", text=f'{task_priority} - {task_name}', values=(task_priority, task_name), tags=(task_priority,))
             tasks[task_name] = {
                 "status": task_status,
@@ -88,6 +91,9 @@ def edit_task(parent):
         
         if dialog.result:
             updated_task_name, updated_task_status, updated_task_priority, updated_task_description, updated_task_creation_date, updated_task_due_date, updated_task_completion_date = dialog.result
+            if updated_task_name != task_name and updated_task_name in tasks:
+                messagebox.showerror("Error", "Ya existe una tarea con ese nombre!")
+                return
             if updated_task_name != task_name:
                 del tasks[task_name]
             tasks[updated_task_name] = {
