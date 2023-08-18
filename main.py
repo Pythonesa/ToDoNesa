@@ -6,7 +6,7 @@ task_list = None
 tasks = {}
 
 def main():
-    global task_list
+    global tree
     
     #Main window:
     root = tk.Tk()
@@ -20,11 +20,14 @@ def main():
     #List of tasks:
     task_frame = ttk.Frame(main_frame)
     task_frame.grid(row=0, column=0, sticky="nsew")
-    scrollbar = ttk.Scrollbar(task_frame)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.BOTH)
-    task_list = tk.Listbox(task_frame, yscrollcommand=scrollbar.set, selectmode=tk.SINGLE)
-    task_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-    scrollbar.config(command=task_list.yview)
+    tree = ttk.Treeview(task_frame, columns=('Priority', 'Task'), show='headings')
+    tree.heading('Priority', text='Prioridad')
+    tree.column('Priority', width=100, stretch=tk.NO)
+    tree.heading('Task', text='Tarea')
+    tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar = ttk.Scrollbar(task_frame, command=tree.yview)
+    tree.config(yscrollcommand=scrollbar.set)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     #Frame for buttons:
     buttons_frame = ttk.Frame(main_frame)
     buttons_frame.grid(row=1, column=0, pady=10, sticky="ew")
@@ -48,7 +51,7 @@ def add_task(parent):
     if dialog.result:
         task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date = dialog.result
         if task_name:
-            task_list.insert(tk.END, f"{task_priority} - {task_name}")
+            tree.insert("", "end", text=f'{task_priority} - {task_name}', values=(task_priority, task_name))
             tasks[task_name] = {
                 "status": task_status,
                 "priority": task_priority,
@@ -62,20 +65,21 @@ def add_task(parent):
 
 def edit_task(parent):
     try:
-        selected_task_index = task_list.curselection()
-        if not selected_task_index:
+        selected_task = tree.selection()
+        if not selected_task:
             messagebox.showinfo("Error", "No hay ninguna tarea seleccionada!")
             return
-        task_entry = task_list.get(selected_task_index[0])
-        task_name = task_entry.split(" - ", 1)[1]
+        
+        task_priority, task_name = tree.item(selected_task, "values")
         task_data = tasks[task_name]
         task_status = task_data['status']
-        task_priority = task_data['priority']
         task_description = task_data['description']
         task_creation_date = task_data['creation_date']
         task_due_date = task_data['due_date']
         task_completion_date = task_data['completion_date']
+        
         dialog = TaskDialog(parent, "Editar tarea", task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date)
+        
         if dialog.result:
             updated_task_name, updated_task_status, updated_task_priority, updated_task_description, updated_task_creation_date, updated_task_due_date, updated_task_completion_date = dialog.result
             if updated_task_name != task_name:
@@ -88,23 +92,25 @@ def edit_task(parent):
                 'due_date': updated_task_due_date,
                 'completion_date': updated_task_completion_date
             }
-            task_list.delete(selected_task_index[0])
-            task_list.insert(selected_task_index[0], f"{updated_task_priority} - {updated_task_name}")
+            
+            tree.delete(selected_task)
+            tree.insert("", "end", values=(updated_task_priority, updated_task_name))
+            
     except KeyError:
         messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
         
 
 def delete_task():
     try:
-        selected_task_index = task_list.curselection()
-        if not selected_task_index:
+        selected_task = tree.selection()
+        if not selected_task:
             messagebox.showinfo("Error", "No hay ninguna tarea seleccionada!")
             return
-        task_name = task_list.get(selected_task_index[0]).split(" - ", 1)[1]
+        task_priority, task_name = tree.item(selected_task, "values")
         confirm = messagebox.askyesno("Confirmar", f"¿Estás seguro de que vas a eliminar la tarea '{task_name}'?")
         if confirm:
             del tasks[task_name]
-            task_list.delete(selected_task_index[0])
+            tree.delete(selected_task)
     except KeyError:
         messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
 
