@@ -28,6 +28,12 @@ def main():
     scrollbar = ttk.Scrollbar(task_frame, command=tree.yview)
     tree.config(yscrollcommand=scrollbar.set)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    
+    #Tags for tree priority background color:
+    tree.tag_configure("Alta", background="#FFCCCC")
+    tree.tag_configure("Media", background="#FFFFCC")
+    tree.tag_configure("Baja", background="#CCFFCC")
+    
     #Frame for buttons:
     buttons_frame = ttk.Frame(main_frame)
     buttons_frame.grid(row=1, column=0, pady=10, sticky="ew")
@@ -51,7 +57,7 @@ def add_task(parent):
     if dialog.result:
         task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date = dialog.result
         if task_name:
-            tree.insert("", "end", text=f'{task_priority} - {task_name}', values=(task_priority, task_name))
+            tree.insert("", "end", text=f'{task_priority} - {task_name}', values=(task_priority, task_name), tags=(task_priority,))
             tasks[task_name] = {
                 "status": task_status,
                 "priority": task_priority,
@@ -94,7 +100,7 @@ def edit_task(parent):
             }
             
             tree.delete(selected_task)
-            tree.insert("", "end", values=(updated_task_priority, updated_task_name))
+            tree.insert("", "end", values=(updated_task_priority, updated_task_name), tags=(updated_task_priority,))
             
     except KeyError:
         messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
