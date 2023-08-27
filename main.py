@@ -5,9 +5,10 @@ from dialogs.task_dialog import TaskDialog
 task_list = None
 tasks = {}
 
+
 def main():
     #Global variables:
-    global tree
+    global tree, status_vars
     
     #Main window:
     root = tk.Tk()
@@ -17,6 +18,15 @@ def main():
     main_frame.pack(pady=20, padx=20, fill="both", expand=True)
     main_frame.grid_rowconfigure(0, weight=1)
     main_frame.grid_columnconfigure(0, weight=1)
+    
+    status_vars = {
+        "Nueva": tk.BooleanVar(value=True),
+        "En progreso": tk.BooleanVar(value=True),
+        "Finalizada": tk.BooleanVar(value=True)
+    }
+    for idx, (status, var) in enumerate(status_vars.items()):
+        chk = ttk.Checkbutton(main_frame, text=status, variable=var, command=update_treeview)
+        chk.grid(row=idx+2, column=0, sticky="w", pady=2)
 
     #List of tasks:
     task_frame = ttk.Frame(main_frame)
@@ -73,6 +83,7 @@ def add_task(parent):
             }
         else:
             messagebox.showinfo("Error", "El nombre de la tarea no puede estar vacío!")
+    update_treeview()
 
 def edit_task(parent):
     try:
@@ -109,6 +120,7 @@ def edit_task(parent):
             
             tree.delete(selected_task)
             tree.insert("", "end", values=(updated_task_priority, updated_task_name), tags=(updated_task_priority,))
+        update_treeview()
             
     except KeyError:
         messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
@@ -127,6 +139,7 @@ def delete_task():
             tree.delete(selected_task)
     except KeyError:
         messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
+    update_treeview()
 
 
 def display_task_details(event):
@@ -142,6 +155,13 @@ def display_task_details(event):
             ttk.Label(details_window, text=f"Fecha de creación: {tasks[task_name]['creation_date']}").pack(pady=10)
             ttk.Label(details_window, text=f"Fecha límite: {tasks[task_name]['due_date']}").pack(pady=10)
             ttk.Label(details_window, text=f"Fecha de finalización: {tasks[task_name]['completion_date']}").pack(pady=10)
+
+def update_treeview():
+    tree.delete(*tree.get_children())
+    active_statuses = [status for status, var in status_vars.items() if var.get()]
+    for task_name, task_data in tasks.items():
+        if task_data["status"] in active_statuses:  # Esta línea verifica que el estado de la tarea esté en los estados activos
+            tree.insert("", "end", text=f'{task_data["priority"]} - {task_name}', values=(task_data["priority"], task_name), tags=(task_data["priority"], task_name))
 
 
 if __name__ == "__main__":
