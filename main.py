@@ -6,6 +6,7 @@ task_list = None
 tasks = {}
 
 def main():
+    #Global variables:
     global tree
     
     #Main window:
@@ -21,6 +22,7 @@ def main():
     task_frame = ttk.Frame(main_frame)
     task_frame.grid(row=0, column=0, sticky="nsew")
     tree = ttk.Treeview(task_frame, columns=('Priority', 'Task'), show='headings')
+    tree.bind("<Double-1>", display_task_details)
     tree.heading('Priority', text='Prioridad')
     tree.column('Priority', width=100, stretch=tk.NO)
     tree.heading('Task', text='Tarea')
@@ -125,6 +127,21 @@ def delete_task():
             tree.delete(selected_task)
     except KeyError:
         messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
+
+
+def display_task_details(event):
+        item = tree.selection()[0]
+        task_name = tree.item(item, "values")[1]
+        if task_name in tasks:
+            details_window = tk.Toplevel()
+            details_window.title(f"Detalles de la tarea '{task_name}'")
+            ttk.Label(details_window, text=f"Nombre: {task_name}").pack(pady=10)
+            ttk.Label(details_window, text=f"Estado: {tasks[task_name]['status']}").pack(pady=10)
+            ttk.Label(details_window, text=f"Prioridad: {tasks[task_name]['priority']}").pack(pady=10)
+            ttk.Label(details_window, text=f"Descripción: {tasks[task_name]['description']}").pack(pady=10)
+            ttk.Label(details_window, text=f"Fecha de creación: {tasks[task_name]['creation_date']}").pack(pady=10)
+            ttk.Label(details_window, text=f"Fecha límite: {tasks[task_name]['due_date']}").pack(pady=10)
+            ttk.Label(details_window, text=f"Fecha de finalización: {tasks[task_name]['completion_date']}").pack(pady=10)
 
 
 if __name__ == "__main__":
