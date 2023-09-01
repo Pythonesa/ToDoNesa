@@ -8,7 +8,7 @@ tasks = {}
 
 def main():
     #Global variables:
-    global tree, status_vars
+    global tree, status_vars, search_var
     
     #Main window:
     root = tk.Tk()
@@ -19,6 +19,7 @@ def main():
     main_frame.grid_rowconfigure(0, weight=1)
     main_frame.grid_columnconfigure(0, weight=1)
     
+    #Filter by status options:
     status_vars = {
         "Nueva": tk.BooleanVar(value=True),
         "En progreso": tk.BooleanVar(value=True),
@@ -28,6 +29,24 @@ def main():
         chk = ttk.Checkbutton(main_frame, text=status, variable=var, command=update_treeview)
         chk.grid(row=idx+2, column=0, sticky="w", pady=2)
 
+
+    #Search:
+    search_frame = ttk.Frame(main_frame)
+    search_frame.grid(row=5, column=0, sticky="ew", pady=5)
+    
+    search_label = ttk.Label(search_frame, text="Buscar:")
+    search_label.grid(row=0, column=0)
+    
+    search_var = tk.StringVar()
+    search_entry = ttk.Entry(search_frame, textvariable=search_var)
+    search_entry.grid(row=0, column=1, sticky="ew", padx=10)
+    
+    search_button = ttk.Button(search_frame, text="Buscar por nombre de tarea", command=search_task)
+    search_button.grid(row=0, column=2, padx=10)
+    
+    search_frame.grid_columnconfigure(1, weight=1)
+    
+    
     #List of tasks:
     task_frame = ttk.Frame(main_frame)
     task_frame.grid(row=0, column=0, sticky="nsew")
@@ -163,6 +182,14 @@ def update_treeview():
         if task_data["status"] in active_statuses:  # Esta línea verifica que el estado de la tarea esté en los estados activos
             tree.insert("", "end", text=f'{task_data["priority"]} - {task_name}', values=(task_data["priority"], task_name), tags=(task_data["priority"], task_name))
 
+
+def search_task():
+    search_term = search_var.get().lower()
+    tree.delete(*tree.get_children())
+    
+    for task_name, task_data in tasks.items():
+        if search_term in task_name.lower():
+            tree.insert("", "end", text=f'{task_data["priority"]} - {task_name}', values=(task_data["priority"], task_name), tags=(task_data["priority"], task_name))
 
 if __name__ == "__main__":
     main()
