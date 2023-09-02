@@ -8,7 +8,7 @@ tasks = {}
 
 def main():
     #Global variables:
-    global tree, status_vars, search_var
+    global tree, status_vars, search_var, search_by_name, search_by_description
     
     #Main window:
     root = tk.Tk()
@@ -41,8 +41,17 @@ def main():
     search_entry = ttk.Entry(search_frame, textvariable=search_var)
     search_entry.grid(row=0, column=1, sticky="ew", padx=10)
     
-    search_button = ttk.Button(search_frame, text="Buscar por nombre de tarea", command=search_task)
+    search_button = ttk.Button(search_frame, text="Buscar tareas", command=search_tasks)
     search_button.grid(row=0, column=2, padx=10)
+    
+    search_by_name = tk.BooleanVar(value=True)
+    search_by_description = tk.BooleanVar(value=False)
+    
+    chk_search_by_name = ttk.Checkbutton(search_frame, text="Buscar por nombre", variable=search_by_name)
+    chk_search_by_name.grid(row=1, column=0, sticky="w", padx=10)
+    
+    chk_search_by_description = ttk.Checkbutton(search_frame, text="Buscar por descripción", variable=search_by_description)
+    chk_search_by_description.grid(row=1, column=1, sticky="w", padx=10)
     
     search_frame.grid_columnconfigure(1, weight=1)
     
@@ -183,13 +192,16 @@ def update_treeview():
             tree.insert("", "end", text=f'{task_data["priority"]} - {task_name}', values=(task_data["priority"], task_name), tags=(task_data["priority"], task_name))
 
 
-def search_task():
+def search_tasks():
     search_term = search_var.get().lower()
     tree.delete(*tree.get_children())
     
     for task_name, task_data in tasks.items():
-        if search_term in task_name.lower():
+        match_name = search_by_name.get() and search_term in task_name.lower()
+        match_description = search_by_description.get() and search_term in task_data["description"].lower()
+        if match_name or match_description:
             tree.insert("", "end", text=f'{task_data["priority"]} - {task_name}', values=(task_data["priority"], task_name), tags=(task_data["priority"], task_name))
+
 
 if __name__ == "__main__":
     main()
