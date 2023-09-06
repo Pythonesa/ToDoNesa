@@ -4,7 +4,7 @@ from datetime import datetime
 from tkcalendar import DateEntry
 
 class TaskDialog(simpledialog.Dialog):
-    def __init__(self, parent, title, task_name="",task_status="Nueva", task_priority="Baja", task_description="", task_creation_date="", task_due_date="", task_completion_date=""):
+    def __init__(self, parent, title, task_name="",task_status="Nueva", task_priority="Baja", task_description="", task_creation_date="", task_due_date="", task_completion_date="", alarm_date="", alarm_hour=""):
         self.default_task_name = task_name
         self.default_task_status = task_status
         self.default_task_priority = task_priority
@@ -12,6 +12,8 @@ class TaskDialog(simpledialog.Dialog):
         self.default_task_creation_date = task_creation_date
         self.default_task_due_date = task_due_date
         self.default_task_completion_date = task_completion_date
+        self.default_alarm_date = alarm_date
+        self.default_alarm_hour = alarm_hour
         super().__init__(parent, title)
     
     def body(self, parent):
@@ -55,6 +57,26 @@ class TaskDialog(simpledialog.Dialog):
         self.e4.insert(0, self.default_task_due_date or "")
         self.completion_date.insert(0, self.default_task_completion_date or "")
         
+        ttk.Label(parent, text="Establecer alarma:").grid(column=0, row=7, sticky="w")
+        self.alarm_var = tk.BooleanVar(value=False)
+        self.alarm_checkbox = ttk.Checkbutton(parent, text="Activar", variable=self.alarm_var, command=self.toggle_alarm)
+        self.alarm_checkbox.grid(column=1, row=7, sticky="w")
+
+        self.alarm_date = DateEntry(parent, date_pattern="dd/mm/Y")
+        self.alarm_date.grid(column=0, row=8, sticky="w")
+        self.alarm_date.grid_remove() 
+
+        self.alarm_hour = ttk.Combobox(parent, values=[f"{i:02d}:00" for i in range(24)], state="readonly") 
+        self.alarm_hour.grid(column=1, row=8, sticky="w")
+        self.alarm_hour.grid_remove() 
+        
+        if self.default_alarm_date and self.default_alarm_hour:
+            self.alarm_var.set(True)
+            self.alarm_date.insert(0, self.default_alarm_date)
+            self.alarm_hour.set(self.default_alarm_hour)
+            self.alarm_date.grid()
+            self.alarm_hour.grid()
+        
         # Si la fecha de vencimiento predeterminada no está establecida, oculta el widget DateEntry
         if not self.default_task_due_date:
             self.e4.grid_remove()
@@ -89,5 +111,16 @@ class TaskDialog(simpledialog.Dialog):
         task_creation_date = self.e3.get()
         task_due_date = self.e4.get() if self.due_date_var.get() else None
         task_completion_date = self.completion_date.get() or None
+        alarm_date = self.alarm_date.get() if self.alarm_var.get() else None
+        alarm_hour = self.alarm_hour.get() if self.alarm_var.get() else None
+
         
-        self.result = (task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date)
+        self.result = (task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date, alarm_date, alarm_hour)
+
+    def toggle_alarm(self):
+        if self.alarm_var.get():
+            self.alarm_date.grid()
+            self.alarm_hour.grid()
+        else:
+            self.alarm_date.grid_remove()
+            self.alarm_hour.grid_remove()

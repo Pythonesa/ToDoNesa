@@ -103,7 +103,7 @@ def main():
 def add_task(parent):
     dialog = TaskDialog(parent, "Crear nueva tarea")
     if dialog.result:
-        task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date = dialog.result
+        task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date, alarm_date, alarm_hour = dialog.result
         if task_name:
             if task_name in tasks:
                 messagebox.showinfo("Error", "Ya existe una tarea con ese nombre!")
@@ -115,7 +115,9 @@ def add_task(parent):
                 "description": task_description,
                 "creation_date": task_creation_date,
                 "due_date": task_due_date,
-                "completion_date": task_completion_date
+                "completion_date": task_completion_date,
+                "alarm_date": alarm_date,
+                "alarm_hour": alarm_hour
             }
         else:
             messagebox.showinfo("Error", "El nombre de la tarea no puede estar vacío!")
@@ -136,11 +138,13 @@ def edit_task(parent):
         task_creation_date = task_data['creation_date']
         task_due_date = task_data['due_date']
         task_completion_date = task_data['completion_date']
+        task_alarm_date = task_data.get('alarm_date', '')  # .get permite un valor predeterminado si la clave no existe.
+        task_alarm_hour = task_data.get('alarm_hour', '')
         
-        dialog = TaskDialog(parent, "Editar tarea", task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date)
+        dialog = TaskDialog(parent, "Editar tarea", task_name, task_status, task_priority, task_description, task_creation_date, task_due_date, task_completion_date, task_alarm_date, task_alarm_hour)
         
         if dialog.result:
-            updated_task_name, updated_task_status, updated_task_priority, updated_task_description, updated_task_creation_date, updated_task_due_date, updated_task_completion_date = dialog.result
+            updated_task_name, updated_task_status, updated_task_priority, updated_task_description, updated_task_creation_date, updated_task_due_date, updated_task_completion_date, updated_alarm_date, updated_alarm_hour = dialog.result
             if updated_task_name != task_name and updated_task_name in tasks:
                 messagebox.showerror("Error", "Ya existe una tarea con ese nombre!")
                 return
@@ -150,16 +154,17 @@ def edit_task(parent):
                 'status': updated_task_status,
                 'priority': updated_task_priority,
                 'description': updated_task_description,
-                'creation_date': task_creation_date,
+                'creation_date': updated_task_creation_date,
                 'due_date': updated_task_due_date,
-                'completion_date': updated_task_completion_date
+                'completion_date': updated_task_completion_date,
+                'alarm_date': updated_alarm_date,
+                'alarm_hour': updated_alarm_hour
             }
             
             tree.delete(selected_task)
             tree.insert("", "end", values=(updated_task_priority, updated_task_name), tags=(updated_task_priority,))
         update_treeview()
         save_tasks_to_csv()
-            
     except KeyError:
         messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
         
@@ -226,7 +231,7 @@ def reset_search():
 
 def save_tasks_to_csv():
     with open('tasks.csv', 'w', newline='') as csvfile:
-        fieldnames = ['task_name', 'status', 'priority', 'description', 'creation_date', 'due_date', 'completion_date']
+        fieldnames = ['task_name', 'status', 'priority', 'description', 'creation_date', 'due_date', 'completion_date', 'alarm_date', 'alarm_hour']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         
         writer.writeheader()
@@ -248,7 +253,9 @@ def load_tasks_from_csv(filename="tasks.csv"):
                     'description': row['description'],
                     'creation_date': row['creation_date'],
                     'due_date': row['due_date'],
-                    'completion_date': row['completion_date']
+                    'completion_date': row['completion_date'],
+                    'alarm_date': row['alarm_date'],
+                    'alarm_hour': row['alarm_hour']
                 }
     except FileNotFoundError:
         # If the file doesn't exist, just return an empty dictionary.
