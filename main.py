@@ -92,6 +92,7 @@ def main():
     delete_task_button = ttk.Button(buttons_frame, text="Eliminar tarea", command=delete_task)
     delete_task_button.pack(side=tk.LEFT, padx=20)
     
+    update_treeview()
     #Main loop:
     root.mainloop()
 
@@ -231,5 +232,27 @@ def save_tasks_to_csv():
             writer.writerow(task_data)
 
 
+def load_tasks_from_csv(filename="tasks.csv"):
+    tasks = {}
+    try:
+        with open(filename, mode='r', newline='', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                task_name = row["task_name"]
+                tasks[task_name] = {
+                    'status': row['status'],
+                    'priority': row['priority'],
+                    'description': row['description'],
+                    'creation_date': row['creation_date'],
+                    'due_date': row['due_date'],
+                    'completion_date': row['completion_date']
+                }
+    except FileNotFoundError:
+        # If the file doesn't exist, just return an empty dictionary.
+        pass
+    return tasks
+
 if __name__ == "__main__":
+    tasks = load_tasks_from_csv()
     main()
+    
