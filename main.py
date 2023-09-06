@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, simpledialog, messagebox
 from dialogs.task_dialog import TaskDialog
 import csv
+import datetime
 
 task_list = None
 tasks = {}
@@ -93,6 +94,8 @@ def main():
     delete_task_button.pack(side=tk.LEFT, padx=20)
     
     update_treeview()
+    show_notifications()
+    
     #Main loop:
     root.mainloop()
 
@@ -251,6 +254,27 @@ def load_tasks_from_csv(filename="tasks.csv"):
         # If the file doesn't exist, just return an empty dictionary.
         pass
     return tasks
+
+
+def get_tasks_near_deadline():
+    near_deadline_tasks = []
+    today = datetime.datetime.now().date()
+    tomorrow = today + datetime.timedelta(days=1)
+    for task_name, task_data in tasks.items():
+        if not task_data["due_date"]:
+            continue
+        due_date = datetime.datetime.strptime(task_data["due_date"], "%d/%m/%Y").date()
+        if today <= due_date <= tomorrow:
+            near_deadline_tasks.append(task_name)
+    return near_deadline_tasks
+
+
+def show_notifications():
+    tasks_to_notify = get_tasks_near_deadline()
+    if tasks_to_notify:
+        tasks_str = "\n".join(tasks_to_notify)
+        messagebox.showwarning("Atención", f"Las siguientes tareas se vencen hoy o mañana:\n{tasks_str}")
+
 
 if __name__ == "__main__":
     tasks = load_tasks_from_csv()
