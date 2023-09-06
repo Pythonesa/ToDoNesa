@@ -3,6 +3,8 @@ from tkinter import ttk, simpledialog, messagebox
 from dialogs.task_dialog import TaskDialog
 import csv
 import datetime
+import threading
+from alarms import check_alarms
 
 task_list = None
 tasks = {}
@@ -95,6 +97,7 @@ def main():
     
     update_treeview()
     show_notifications()
+    threading.Thread(target=check_alarms, args=(tasks,), daemon=True).start()
     
     #Main loop:
     root.mainloop()
