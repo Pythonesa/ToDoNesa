@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, simpledialog, messagebox
 from dialogs.task_dialog import TaskDialog
+import csv
 
 task_list = None
 tasks = {}
@@ -115,6 +116,7 @@ def add_task(parent):
         else:
             messagebox.showinfo("Error", "El nombre de la tarea no puede estar vacío!")
     update_treeview()
+    save_tasks_to_csv()
 
 def edit_task(parent):
     try:
@@ -152,6 +154,7 @@ def edit_task(parent):
             tree.delete(selected_task)
             tree.insert("", "end", values=(updated_task_priority, updated_task_name), tags=(updated_task_priority,))
         update_treeview()
+        save_tasks_to_csv()
             
     except KeyError:
         messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
@@ -171,6 +174,7 @@ def delete_task():
     except KeyError:
         messagebox.showerror("Error", "La tarea seleccionada no fue encontrada!")
     update_treeview()
+    save_tasks_to_csv()
 
 
 def display_task_details(event):
@@ -214,6 +218,17 @@ def reset_search():
     search_by_name.set(True)
     search_by_description.set(False)
     update_treeview()
+
+
+def save_tasks_to_csv():
+    with open('tasks.csv', 'w', newline='') as csvfile:
+        fieldnames = ['task_name', 'status', 'priority', 'description', 'creation_date', 'due_date', 'completion_date']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        writer.writeheader()
+        for task_name, task_data in tasks.items():
+            task_data['task_name'] = task_name
+            writer.writerow(task_data)
 
 
 if __name__ == "__main__":
