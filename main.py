@@ -200,6 +200,9 @@ def search_tasks():
     tree.delete(*tree.get_children())
     
     for task_name, task_data in tasks.items():
+        if not status_vars[task_data["status"]].get():
+            continue
+                
         match_name = search_by_name.get() and search_term in task_name.lower()
         match_description = search_by_description.get() and search_term in task_data["description"].lower()
         if match_name or match_description:
